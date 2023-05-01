@@ -1,0 +1,40 @@
+# Setup PHP apache untuk webserver redlock-web-2.0
+
+version: '3.8' #Versi dari docker yang akan digunakan pada kasus ini
+services:
+  php-apache-environment: #Perlengkapan untuk setup PHP apache
+    container_name: redlock-web-2.0 #Nama dari docker container nya yaitu redlock-web-2.0
+    build: 
+      context: ./redlock-web-2.0
+      dockerfile: Dockerfile
+    depends_on:
+      - db #webserver php akan tergantung dengan database yang dibuat
+    volumes:
+      - ./redlock-web-2.0/src:/var/www/html/ #setelah menjalankan setup ini, maka akan ada directory baru yaitu src
+    ports:
+      - 7077:80 #Docker container yang dijalankan akan berjalan di port 80 yang di forward ke port 7077
+
+#Setup database untuk webserver redlock-web-2.0
+  db:
+    container_name: redlock-database #Nama dari container yang digunakan untuk database
+    image: mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root_password #root_password yang akan digunakan
+      MYSQL_DATABASE: redlock_database #database yang akan digunakan
+      MYSQL_USER: user #nama user yang akan digunakan
+      MYSQL_PASSWORD: password #password yang akan digunakan
+    ports:
+      - "9906:3306" #ports yang akan digunakan
+
+#Setup phpMyAdmin untuk webserver redlock-web-2.0
+  phpMyAdmin:
+    image: phpmyadmin/phpmyadmin
+    ports:
+      - '8000:80' #ports yang akan digunakan untuk phpMyAdmin
+    restart: always
+    environment:
+      PMA_HOST: db
+    depends_on:
+      - db  
+
